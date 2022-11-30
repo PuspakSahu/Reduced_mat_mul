@@ -35,7 +35,7 @@ __global__ void HELP(const int *a, const int *b, int *c, int N) {
 
   }
 }
-
+// NEw commentaiuhdiuhwaiudhuiawd
 
 
 void gpuThread(int N, int *matA, int *matB, int *output)
