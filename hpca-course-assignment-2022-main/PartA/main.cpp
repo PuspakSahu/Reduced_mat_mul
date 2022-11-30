@@ -72,10 +72,10 @@ int main(int argc, char *argv[])
 
   // Execute reference program
   auto begin = TIME_NOW;
-  reference(N, matA, matB, output_reference);
+  //reference(N, matA, matB, output_reference);
   auto end = TIME_NOW;
-  cout << "Reference execution time: " << 
-    (double)TIME_DIFF(std::chrono::microseconds, begin, end) / 1000.0 << " ms\n";    
+  //cout << "Reference execution time: " << 
+  //  (double)TIME_DIFF(std::chrono::microseconds, begin, end) / 1000.0 << " ms\n";    
 
 
 /*   cerr << "matA: " << endl;
@@ -92,13 +92,13 @@ int main(int argc, char *argv[])
     }
     cerr << endl;
   }*/
-  cerr << "output_reference: " << endl;
-  for(int i=0; i<(N>>1); i++){
-    for(int j=0; j<(N>>1); j++){
-      cerr << output_reference[i*(N>>1)+j] << "\t";
-    }
-    cerr << endl;
-  } 
+  // cerr << "output_reference: " << endl;
+  // for(int i=0; i<(N>>1); i++){
+  //   for(int j=0; j<(N>>1); j++){
+  //     cerr << output_reference[i*(N>>1)+j] << "\t";
+  //   }
+  //   cerr << endl;
+  // } 
 
   // Execute single thread
   int *output_single = new int[(N>>1)*(N>>1)];
@@ -122,12 +122,12 @@ int main(int argc, char *argv[])
   cout << "Multi-threaded execution time: " << 
     (double)TIME_DIFF(std::chrono::microseconds, begin, end) / 1000.0 << " ms\n";
 
-  for(int i=0; i<(N>>1); i++){
-    for(int j=0; j<(N>>1); j++){
-      cerr << output_multi[i*(N>>1)+j] << "\t";
-    }
-    cerr << endl;
-  } 
+  // for(int i=0; i<(N>>1); i++){
+  //   for(int j=0; j<(N>>1); j++){
+  //     cerr << output_multi[i*(N>>1)+j] << "\t";
+  //   }
+  //   cerr << endl;
+  // } 
   for(int i = 0; i < ((N>>1)*(N>>1)); ++i)
     if(output_multi[i] != output_reference[i]) {
       cout << "Mismatch at " << i << "\n";
