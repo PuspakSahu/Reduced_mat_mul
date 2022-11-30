@@ -16,12 +16,16 @@ using std::cout;
 using std::generate;
 using std::vector;
 
+//actual function for each thread
 __global__ void HELP(const int *a, const int *b, int *c, int N) {
  
+  int blX=blockIdx.x * blockDim.x;
+  int blY=blockIdx.y * blockDim.y;
+  int R =  blX + threadIdx.x;
+  int C =  blY+ threadIdx.y;
 
-  int R = blockIdx.x * blockDim.x + threadIdx.x;
-  int C = blockIdx.y * blockDim.y + threadIdx.y;
   //int temp;
+  //
   int ind=R * (N/2) + C;
   c[ind] = 0;
   for (int k = 0; k < N; k++) {
@@ -35,47 +39,49 @@ __global__ void HELP(const int *a, const int *b, int *c, int N) {
 
   }
 }
-// NEw commentaiuhdiuhwaiudhuiawd
+
 
 
 void gpuThread(int N, int *matA, int *matB, int *output)
 {   
 
-
+  int big_square=N*N;
  int *MatrixA_d, *MatrixB_d, *Outmat_d;
-  
-  // allocate device memory 
-    cudaMalloc((void**)&MatrixA_d, sizeof(int)*N*N);
-    cudaMalloc((void**)&MatrixB_d, sizeof(int)*N*N);
-    cudaMalloc((void**)&Outmat_d, sizeof(int)*N*N/4);
+
+  // allocate device memory by cuda malloc
+    cudaMalloc((void**)&MatrixA_d, sizeof(int)*big_square);
+    cudaMalloc((void**)&MatrixB_d, sizeof(int)*big_square);
+    cudaMalloc((void**)&Outmat_d, sizeof(int)*big_square/4);
 
     // copy data from host to to device
-    cudaMemcpy(MatrixA_d, matA, sizeof(int)*N*N, cudaMemcpyHostToDevice);
-    cudaMemcpy(MatrixB_d, matB, sizeof(int)*N*N, cudaMemcpyHostToDevice);
+    cudaMemcpy(MatrixA_d, matA, sizeof(int)*big_square, cudaMemcpyHostToDevice);
+    cudaMemcpy(MatrixB_d, matB, sizeof(int)*big_square, cudaMemcpyHostToDevice);
 
 
 
-  // Threads per CTA dimension
+  // Threads per block grid in 1d
   int Thread_COUNT = 4;
 
-  // Blocks per grid dimension (assumes Thread_COUNT divides N evenly)
-  int Block_COUNT = (N/2) / Thread_COUNT;
+  int row_output=N>>1;
+  int Block_COUNT = row_output / Thread_COUNT;
 
-  // Use dim3 structs for block  and grid dimensions
+
+  //approprioate threads are used(16 per block)
+  //create dimension
   dim3 threads(Thread_COUNT, Thread_COUNT);
   dim3 blocks(Block_COUNT, Block_COUNT);
 
-  // Launch kernel
+  // call the HELP
   auto begin = TIME_NOW;
   HELP<<<blocks, threads>>>(MatrixA_d, MatrixB_d, Outmat_d, N);
   auto end = TIME_NOW;
   cout<<"---------------------------  executed successfully on GPU   ---------------------------------------- "<<N<<endl;
   cout << "GPU Multi-threaded execution time: " << (double)TIME_DIFF(std::chrono::microseconds, begin, end) / 1000.0 << " ms\n";
 
-  // Copy back to the host
-  cudaMemcpy(output, Outmat_d, sizeof(int)*N*N/4, cudaMemcpyDeviceToHost);
+  //giving back to the CPU
+  cudaMemcpy(output, Outmat_d, sizeof(int)*big_square/4, cudaMemcpyDeviceToHost);
 
-  // Free memory on device
+  //we free thee memory
   cudaFree(MatrixA_d);
   cudaFree(MatrixB_d);
   cudaFree(Outmat_d);
